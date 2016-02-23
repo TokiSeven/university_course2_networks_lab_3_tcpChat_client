@@ -1,12 +1,12 @@
 #include "tcpchat_client.h"
 #include <QTimer>
 
-TcpChat_Client::TcpChat_Client() : QObject(this)
+TcpChat_Client::TcpChat_Client()
 {
     soc = new QTcpSocket(this);
     connect(soc, SIGNAL(readyRead()), this, SLOT(read_message()));
-    connect(sok, SIGNAL(connected()), this, SLOT(sl_connected()));
-    connect(sok, SIGNAL(disconnected()), this, SLOT(sl_disconnected()));
+    connect(soc, SIGNAL(connected()), this, SLOT(sl_connected()));
+    connect(soc, SIGNAL(disconnected()), this, SLOT(sl_disconnected()));
     this->server_status = ST_UNDEF;
     _blockSize = 0;
 }
@@ -72,15 +72,28 @@ void TcpChat_Client::read_message()
     }
 
     //ждем пока блок прийдет полностью
-    if (_sok->bytesAvailable() < _blockSize)
+    if (soc->bytesAvailable() < _blockSize)
         return;
     else
         _blockSize = 0;//можно принимать новый блок
 
-    QString message;
-    in >> message;
+    QString cmd;
+    in >> cmd;
 
-    this->messages.append(message);
+    if (cmd == QString::fromStdString("CLIENTS"))
+    {
+        QList<QHostAddress> addr;
+        in >> addr;
+        this->clients = addr;
+        emit clients_come();
+    }
+    else if (cmd == QString::fromStdString("MESSAGE"))
+    {
+        QString mess;
+        in >> mess;
+        this->messages.append(mess);
+        emit message_come();
+    }
 }
 
 void TcpChat_Client::sl_connected()
@@ -92,6 +105,8 @@ void TcpChat_Client::sl_connected()
 void TcpChat_Client::sl_disconnected()
 {
     this->server_status = ST_OFF;
+    this->clients.clear();
+    this->messages.clear();
     emit disconnected();
 }
 

@@ -6,14 +6,14 @@
 #include <QHostAddress>
 #include <QByteArray>
 #include <QDataStream>
+#include <QDebug>
 
 enum STATUS {ST_ON, ST_OFF, ST_UNDEF};
 
 class TcpChat_Client : public QObject
 {
-public:
     Q_OBJECT
-
+public:
     TcpChat_Client();
     ~TcpChat_Client();
 
@@ -31,6 +31,7 @@ signals:
     void disconnected();
     void time_out();
     void message_come();
+    void clients_come();
 
 private slots:
     void read_message();//when message come

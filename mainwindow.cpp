@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(chat, SIGNAL(connected()), this, SLOT(sl_updateGUI()));
     connect(chat, SIGNAL(disconnected()), this, SLOT(sl_updateGUI()));
     connect(chat, SIGNAL(message_come()), this, SLOT(sl_updateGUI()));
+    connect(chat, SIGNAL(clients_come()), this, SLOT(sl_updateGUI()));
     connect(chat, SIGNAL(time_out()), this, SLOT(sl_updateGUI()));
 }
 
@@ -36,10 +37,13 @@ void MainWindow::sl_updateGUI()
     this->ui->list_clients->clear();
     this->ui->list_messages->clear();
 
-    for (int i = 0; i < chat->getAllClients().size(); i++)
-        this->ui->list_clients->addItem(chat->getAllClients()[i].toString());
-    for (int i = 0; i < chat->getAllMessages().size(); i++)
-        this->ui->list_messages->addItem(chat->getAllMessages()[i]);
+    QList<QHostAddress> cl = chat->getAllClients();
+    QList<QString> ms = chat->getAllMessages();
+
+    for (int i = 0; i < cl.size(); i++)
+        this->ui->list_clients->addItem(cl[i].toString());
+    for (int i = 0; i < ms.size(); i++)
+        this->ui->list_messages->addItem(ms[i]);
 }
 
 void MainWindow::on_button_connect_clicked()

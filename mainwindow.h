@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "tcpchat_client.h"
+#include <QDebug>
 
 namespace Ui {
 class MainWindow;
