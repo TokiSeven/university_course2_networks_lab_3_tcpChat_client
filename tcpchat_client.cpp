@@ -9,6 +9,7 @@ TcpChat_Client::TcpChat_Client()
     connect(soc, SIGNAL(disconnected()), this, SLOT(sl_disconnected()));
     this->server_status = ST_UNDEF;
     _blockSize = 0;
+    this->auth = false;
 }
 
 TcpChat_Client::~TcpChat_Client()
@@ -36,7 +37,7 @@ void TcpChat_Client::disconnect_from_server()
     }
 }
 
-void TcpChat_Client::send_message(QString mess)
+void TcpChat_Client::send_message(QString cmd, QString mess)
 {
     if (this->server_status == ST_ON)
     {
@@ -44,7 +45,9 @@ void TcpChat_Client::send_message(QString mess)
         QDataStream out(&block, QIODevice::WriteOnly);
 
         //резервируем 2 байта для размера блока.
-        out << (quint16)0 << mess;
+        out << (quint16)0;
+        out << cmd;
+        out << mess;
 
         //возваращаемся в начало
         out.device()->seek(0);
@@ -82,17 +85,29 @@ void TcpChat_Client::read_message()
 
     if (cmd == QString::fromStdString("CLIENTS"))
     {
-        QList<QHostAddress> addr;
+        QList<QString> addr;
         in >> addr;
         this->clients = addr;
         emit clients_come();
     }
-    else if (cmd == QString::fromStdString("MESSAGE"))
+    else if (cmd == QString::fromStdString("MESS"))
     {
         QString mess;
         in >> mess;
         this->messages.append(mess);
         emit message_come();
+    }
+    else if (cmd == QString::fromStdString("AUTH"))
+    {
+        QString mess;
+        in >> mess;
+        qDebug() << cmd + "::" + mess;
+        if (mess == QString::fromStdString("YES"))
+            this->auth = true;
+        else
+            this->auth = false;
+
+        emit sig_auth();
     }
 }
 

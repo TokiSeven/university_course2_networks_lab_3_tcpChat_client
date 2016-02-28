@@ -20,11 +20,12 @@ public:
     void connect_to_server(QString);//try to connect to server
     void disconnect_from_server();//if you want to disconnect from server
 
-    void send_message(QString);
+    void send_message(QString, QString);
 
     STATUS getServerStatus()const{return this->server_status;}
     QList<QString> getAllMessages()const{return this->messages;}
-    QList<QHostAddress> getAllClients()const{return this->clients;}
+    QList<QString> getAllClients()const{return this->clients;}
+    bool isAuth()const{return this->auth;}
 
 signals:
     void connected();
@@ -32,6 +33,7 @@ signals:
     void time_out();
     void message_come();
     void clients_come();
+    void sig_auth();
 
 private slots:
     void read_message();//when message come
@@ -44,8 +46,9 @@ private:
     QHostAddress server_ip;//server ip
     STATUS server_status;//server status
     QList<QString> messages;//all messages
-    QList<QHostAddress> clients;//all clients
+    QList<QString> clients;//all clients
     quint16 _blockSize;//current size of data block
+    bool auth;
 };
 
 #endif // TCPCHAT_CLIENT_H

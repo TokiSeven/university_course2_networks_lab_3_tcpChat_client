@@ -18,15 +18,22 @@ public:
     ~MainWindow();
 
 private slots:
+    void sl_connected();
+    void sl_disconnected();
+    void sl_auth();
     void sl_updateGUI();
-
-    void on_button_connect_clicked();
+    void sl_timeout();
 
     void on_button_send_clicked();
+
+    void on_button_auth_clicked();
+
+    void on_button_reconnect_clicked();
 
 private:
     Ui::MainWindow *ui;
     TcpChat_Client *chat;
+    QString server_ip;
 };
 
 #endif // MAINWINDOW_H
