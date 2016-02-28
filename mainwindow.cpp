@@ -20,6 +20,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->line_nickname->setEnabled(false);
     ui->button_auth->setEnabled(false);
     ui->button_reconnect->setEnabled(false);
+
+    this->ui->label_server_status->setStyleSheet("background-color: black;color: white;");
+    this->ui->label_info_server_status->setStyleSheet("background-color: black;color: white;");
 }
 
 MainWindow::~MainWindow()
@@ -32,6 +35,7 @@ void MainWindow::sl_connected()
     if (chat->getServerStatus() == ST_ON)
     {
         this->ui->label_server_status->setText("Online");
+        this->ui->label_server_status->setStyleSheet("background-color: black;color: rgb(0, 255, 0);");
         ui->text_message->setEnabled(false);
         ui->button_send->setEnabled(false);
         ui->line_nickname->setEnabled(true);
@@ -45,6 +49,7 @@ void MainWindow::sl_disconnected()
     if (chat->getServerStatus() == ST_OFF)
     {
         this->ui->label_server_status->setText("Offline");
+        this->ui->label_server_status->setStyleSheet("background-color: black;color: rgb(255, 0, 0);");
         ui->text_message->setEnabled(false);
         ui->button_send->setEnabled(false);
         ui->line_nickname->setEnabled(false);
@@ -58,6 +63,7 @@ void MainWindow::sl_timeout()
     if (chat->getServerStatus() == ST_OFF || chat->getServerStatus() == ST_UNDEF)
     {
         this->ui->label_server_status->setText("Undefined");
+        this->ui->label_server_status->setStyleSheet("background-color: black;color: rgb(255, 255, 0);");
         ui->text_message->setEnabled(false);
         ui->button_send->setEnabled(false);
         ui->line_nickname->setEnabled(false);
@@ -94,17 +100,37 @@ void MainWindow::sl_updateGUI()
     QList<QString> ms = chat->getAllMessages();
 
     for (int i = 0; i < cl.size(); i++)
+    {
         this->ui->list_clients->addItem(cl[i]);
+        QListWidgetItem *item = this->ui->list_clients->item(this->ui->list_clients->count() - 1);
+        item->setBackgroundColor(QColor(i*i + 10, i*5 + 20, i*5 + 25, 60));
+    }
     for (int i = 0; i < ms.size(); i++)
+    {
         this->ui->list_messages->addItem(ms[i]);
+        QListWidgetItem *item = this->ui->list_messages->item(this->ui->list_messages->count() - 1);
+
+        QString nm;
+        for (int i = 0; i < item->text().length(); i++)
+            if (item->text()[i] == '\n')
+                break;
+            else
+                nm.append(item->text()[i]);
+
+        for(int i = 0; i < this->ui->list_clients->count(); i++)
+        {
+            if (this->ui->list_clients->item(i)->text() == nm)
+                item->setBackgroundColor(this->ui->list_clients->item(i)->backgroundColor());
+        }
+    }
 }
 
 void MainWindow::on_button_send_clicked()
 {
-    if (!this->ui->text_message->text().isEmpty())
+    if (!this->ui->text_message->toPlainText().isEmpty())
     {
-        chat->send_message("MESS", this->ui->text_message->text());
-        ui->text_message->setText("");
+        chat->send_message("MESS", this->ui->text_message->toPlainText());
+        ui->text_message->clear();
     }
 }
 

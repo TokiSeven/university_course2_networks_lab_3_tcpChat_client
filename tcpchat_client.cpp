@@ -80,9 +80,12 @@ void TcpChat_Client::read_message()
     else
         _blockSize = 0;//можно принимать новый блок
 
+    //----------------read data
     QString cmd;
     in >> cmd;
 
+
+    //-------------------check command from server and read data
     if (cmd == QString::fromStdString("CLIENTS"))
     {
         QList<QString> addr;
@@ -94,20 +97,29 @@ void TcpChat_Client::read_message()
     {
         QString mess;
         in >> mess;
-        this->messages.append(mess);
+        //this->messages.append(mess);
+        this->messages.insert(0, mess);
         emit message_come();
     }
     else if (cmd == QString::fromStdString("AUTH"))
     {
         QString mess;
         in >> mess;
-        qDebug() << cmd + "::" + mess;
         if (mess == QString::fromStdString("YES"))
             this->auth = true;
         else
             this->auth = false;
 
         emit sig_auth();
+    }
+    else if (cmd == QString::fromStdString("MESSA"))
+    {
+        QList<QString> messa;
+        in >> messa;
+        this->messages.clear();
+        this->messages = messa;
+
+        emit message_come();
     }
 }
 
